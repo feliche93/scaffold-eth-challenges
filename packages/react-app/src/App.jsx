@@ -486,6 +486,9 @@ function App(props) {
   const buyTokensEvents = useEventListener(readContracts, "Vendor", "BuyTokens", localProvider, 1);
   console.log("📟 buyTokensEvents:", buyTokensEvents);
 
+  const sellTokensEvents = useEventListener(readContracts, "Vendor", "SellTokens", localProvider, 1);
+  console.log("📟 sellTokensEvents:", sellTokensEvents);
+
   const [tokenBuyAmount, setTokenBuyAmount] = useState();
   const [tokenSellAmount, setTokenSellAmount] = useState();
   const [isSellAmountApproved, setIsSellAmountApproved] = useState();
@@ -624,11 +627,6 @@ function App(props) {
                 </div>
               </Card>
             </div>
-
-            {/*Extra UI for buying the tokens back from the user using "approve" and "sellTokens"*/}
-            
-            {/*
-
             <Divider />
             <div style={{ padding: 8, marginTop: 32, width: 300, margin: "auto" }}>
               <Card title="Sell Tokens">
@@ -698,7 +696,7 @@ function App(props) {
               </Card>
             </div>
 
-            */}
+
 
             <div style={{ padding: 8, marginTop: 32 }}>
               <div>Vendor Token Balance:</div>
@@ -720,6 +718,24 @@ function App(props) {
                       <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> paid
                       <Balance balance={item.args[1]} />
                       ETH to get
+                      <Balance balance={item.args[2]} />
+                      Tokens
+                    </List.Item>
+                  );
+                }}
+              />
+            </div>
+
+            <div style={{ width: 500, margin: "auto", marginTop: 64 }}>
+              <div>Sell Token Events:</div>
+              <List
+                dataSource={sellTokensEvents}
+                renderItem={item => {
+                  return (
+                    <List.Item key={item.blockNumber + item.blockHash}>
+                      <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> got
+                      <Balance balance={item.args[1]} />
+                      ETH to sell
                       <Balance balance={item.args[2]} />
                       Tokens
                     </List.Item>

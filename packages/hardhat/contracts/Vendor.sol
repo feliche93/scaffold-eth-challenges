@@ -7,6 +7,11 @@ import "hardhat/console.sol";
 
 contract Vendor is Ownable {
     event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
+    event SellTokens(
+        address seller,
+        uint256 amountOfETH,
+        uint256 amountOfTokens
+    );
 
     YourToken public yourToken;
 
@@ -45,5 +50,44 @@ contract Vendor is Ownable {
         require(sent, "Failed to send user balance back to the owner");
     }
 
-    // ToDo: create a sellTokens() function:
+    /**
+     * @notice Allows the vendor contract to buy tokens back from the user
+     */
+    function sellTokens(uint256 amountOfToken) public {
+        // Checks wether user wants to sell more than 0 tokens
+        require(
+            amountOfToken > 0,
+            "Amount of tokens to sell must be greater than 0"
+        );
+
+        // Checks wether user has enough tokens to sell
+        uint256 tokenBalance = yourToken.balanceOf(msg.sender);
+        require(tokenBalance >= amountOfToken, "Not enough tokens to sell");
+
+        // Calculates eth amount and checks if required balance available in vendor contract
+        uint256 ethAmount = amountOfToken / tokensPerEth;
+        require(
+            address(this).balance >= ethAmount,
+            "Vendor Contract does not have enough eth for sale"
+        );
+
+        // Logs the allowance
+        uint256 allowance = yourToken.allowance(msg.sender, address(this));
+        console.log("Adress Owner %s: ", msg.sender);
+        console.log("Adress Spender %s: ", address(this));
+        console.log("Allowance %s", allowance);
+
+        bool transfered = yourToken.transferFrom(
+            msg.sender,
+            address(this),
+            amountOfToken
+        );
+        console.log("transfered: %s", transfered);
+
+        // emit selling
+        emit SellTokens(msg.sender, ethAmount, amountOfToken);
+
+        (bool sent, ) = msg.sender.call{value: ethAmount}("");
+        require(sent, "Failed to send user ETH back");
+    }
 }
